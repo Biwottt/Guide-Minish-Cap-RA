@@ -1,0 +1,17 @@
+{
+  "name": "Minish Cap al 100% — Guía RetroAchievements",
+  "short_name": "Minish 100%",
+  "description": "Guía de logros de RetroAchievements para The Legend of Zelda: The Minish Cap (set #559), con progreso guardado en el dispositivo.",
+  "lang": "es",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#EEF2E3",
+  "theme_color": "#1D3027",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
