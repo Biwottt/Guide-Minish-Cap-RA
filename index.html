@@ -114,6 +114,17 @@ textarea{width:100%;min-height:90px;font:14px/1.4 ui-monospace,Menlo,Consolas,mo
 .syncdot.ok{background:var(--ezlo)}
 .syncdot.local{background:var(--gold)}
 .resume{margin-top:14px}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 18px}
+.seg button{font:inherit;font-weight:500;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.segpane .tools input[type=search]{font:inherit;flex:1;min-width:180px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+.num{font-family:var(--serif);font-weight:700;color:var(--ezlo);margin-right:2px}
+.res{color:var(--muted);font-size:.95rem;margin-top:2px}
+li.done .res{opacity:.8}
+.pc{display:inline-block;font-size:.78rem;border-radius:4px;padding:0 7px;color:#fff;white-space:nowrap;vertical-align:.1em}
+.pc.g{background:#3E8E5A}.pc.b{background:#2E62A8}.pc.r{background:#B3313A}.pc.o{background:#A87408}
+.stage-note{margin:0 18px 6px;color:var(--muted);font-size:.95rem}
+.bigcount{font-family:var(--serif);font-weight:700;font-size:1.2rem}
 ol.steps .txt{cursor:pointer}
 footer{border-top:2px solid var(--line);padding:18px 0 40px;color:var(--muted);font-size:.9rem}
 @media (max-width:640px){
@@ -177,7 +188,7 @@ footer{border-top:2px solid var(--line);padding:18px 0 40px;color:var(--muted);f
     <button role="tab" data-t="ruta" aria-selected="false"><span class="long">Ruta paso a paso</span><span class="short">Ruta</span></button>
     <button role="tab" data-t="logros" aria-selected="false"><span class="long">Logros</span><span class="short">Logros</span></button>
     <button role="tab" data-t="jefes" aria-selected="false"><span class="long">Jefes sin daño</span><span class="short">Jefes</span></button>
-    <button role="tab" data-t="extra" aria-selected="false"><span class="long">Coleccionables y progreso</span><span class="short">Extras</span></button>
+    <button role="tab" data-t="extra" aria-selected="false"><span class="long">Listas y coleccionables</span><span class="short">Listas</span></button>
   </div>
 </nav>
 
@@ -232,7 +243,7 @@ footer{border-top:2px solid var(--line);padding:18px 0 40px;color:var(--muted);f
   <textarea id="ioBox" aria-label="Respaldo del progreso" placeholder="Aquí aparece tu respaldo, o pega uno para importarlo."></textarea>
 
   <h3>Equivalencias español ↔ inglés</h3>
-  <p class="muted">Para cruzar la guía con comentarios de RA, el checklist de Thonky o cualquier guía en inglés.</p>
+  <p class="muted">Para cruzar la guía con comentarios de RA o cualquier guía en inglés.</p>
   <div class="tablewrap"><table class="ach gloss" id="glossTable"></table></div>
 </section>
 
@@ -244,13 +255,17 @@ footer{border-top:2px solid var(--line);padding:18px 0 40px;color:var(--muted);f
 
 <section class="panel" id="ruta" role="tabpanel">
   <h2>Ruta paso a paso</h2>
-  <p>Ordenada según la historia. Los pasos con punto rojo son de atención obligatoria. Las etiquetas debajo de cada paso son los logros que salen ahí: al tocarlas los marcas como obtenidos. «TC» significa trozo de corazón; la numeración sigue la lista de Thonky.</p>
+  <p>Aquí está solo lo necesario para terminar el juego y, marcado con punto rojo, todo lo que se pierde o se complica si no lo haces en su momento. El resto (trozos de corazón, uniones, figuritas, botellas, pergaminos) está en «Listas», para que lo recojas a tu ritmo sin que la ruta te lleve de la mano.</p>
   <div class="tools">
     <button class="btn" id="openAll">Abrir todos</button>
     <button class="btn" id="closeAll">Cerrar todos</button>
     <label class="tog"><input type="checkbox" id="hideDone"> Ocultar pasos hechos</label>
   </div>
   <div id="route"></div>
+  <details class="chapter" id="postgame">
+    <summary><span class="chnum">+</span><span class="chtitle">Después de los créditos<small>Fuera de la ruta: ábrelo solo cuando ya hayas terminado</small></span></summary>
+    <ol class="steps" id="postBody"></ol>
+  </details>
 </section>
 
 <section class="panel" id="logros" role="tabpanel">
@@ -276,20 +291,52 @@ footer{border-top:2px solid var(--line);padding:18px 0 40px;color:var(--muted);f
 </section>
 
 <section class="panel" id="extra" role="tabpanel">
-  <h2>Coleccionables y progreso</h2>
-  <div id="collect"></div>
+  <h2>Listas y coleccionables</h2>
+  <div class="seg" role="group" aria-label="Listas">
+    <button data-l="pFus" id="segFus" aria-pressed="true">Uniones</button>
+    <button data-l="pTc" id="segTc" aria-pressed="false">Corazones</button>
+    <button data-l="pFig" id="segFig" aria-pressed="false">Figuritas</button>
+    <button data-l="collect" aria-pressed="false">Resto</button>
+  </div>
+
+  <div class="segpane" id="pFus">
+    <p><span class="bigcount" id="cFus">0 de 100</span> uniones de piedras. Ordenadas por la etapa de la historia en que se abren. Las 9 doradas (41 a 43, 83 y 86 a 90) son obligatorias para avanzar.</p>
+    <div class="tools">
+      <input type="search" id="qFus" placeholder="Buscar persona, lugar o premio" aria-label="Buscar unión">
+      <label class="tog"><input type="checkbox" id="hFus"> Ocultar hechas</label>
+    </div>
+    <div id="fusBody"></div>
+  </div>
+
+  <div class="segpane" id="pTc" hidden>
+    <p><span class="bigcount" id="cTc">0 de 44</span>. Empiezas con 3 corazones: 6 contenedores y 44 trozos (11 corazones) te llevan a 20.</p>
+    <p class="muted" id="heartTotal"></p>
+    <div class="tools">
+      <input type="search" id="qTc" placeholder="Buscar zona o detalle" aria-label="Buscar trozo">
+      <label class="tog"><input type="checkbox" id="hTc"> Ocultar conseguidos</label>
+    </div>
+    <details class="chapter" open><summary><span class="chnum">44</span><span class="chtitle">Trozos de corazón<small>La numeración es la que usa la ruta (TC)</small></span></summary><ol class="steps" id="tcBody"></ol></details>
+    <details class="chapter" open><summary><span class="chnum">6</span><span class="chtitle">Contenedores de corazón<small>Cinco jefes y Librari</small></span></summary><ol class="steps" id="hcBody"></ol></details>
+  </div>
+
+  <div class="segpane" id="pFig" hidden>
+    <p><span class="bigcount" id="cFig">0 de 136</span> figuritas del Escultor Minitendo, agrupadas por cuándo se desbloquean. Solo puedes ganar las que ya están desbloqueadas; con 130 antes del final se abre la casa de Orwen y las 6 últimas llegan tras los créditos.</p>
+    <div class="note red">Si el Escultor Minitendo dice que no tiene figuritas nuevas, no cambies caracolas (probabilidad 0%): puede darte una figurita corrupta que impide la medalla.</div>
+    <div class="tools">
+      <input type="search" id="qFig" placeholder="Buscar figurita" aria-label="Buscar figurita">
+      <label class="tog"><input type="checkbox" id="hFig"> Ocultar conseguidas</label>
+    </div>
+    <div id="figBody"></div>
+  </div>
+
+  <div class="segpane" id="collect" hidden></div>
 </section>
 
 </main>
 
 <footer>
   <div class="wrap">
-    Fuentes: páginas de logros, comentarios y foro oficial del set en RetroAchievements; guías de Thonky, Zelda Dungeon y Zelda Wiki; texto oficial en español del volcado de zeldaret/tmc. Recursos:
-    <a href="https://retroachievements.org/game/559">página del set</a>,
-    <a href="https://github.com/Prof9/Minish-Cap-EU-Backport">European Backport Edition</a>,
-    <a href="https://www.thonky.com/zelda-minish-cap/kinstone-fusion">checklist de uniones de Thonky (en inglés)</a>,
-    <a href="https://www.thonky.com/zelda-minish-cap/pieces-of-heart">trozos de corazón (en inglés)</a>,
-    <a href="https://nostamap.io/map/the-legend-of-zelda-the-minish-cap-gba">mapa interactivo</a>.
+    Fuentes: páginas de logros, comentarios y foro oficial del set en RetroAchievements; guías de Thonky, Zelda Dungeon y Zelda Wiki; texto oficial en español del volcado de zeldaret/tmc. Todo su contenido útil está incluido en esta app.
   </div>
 </footer>
 
@@ -407,118 +454,80 @@ const GLOSS = [
 ];
 
 const ROUTE = [
-["Prólogo y Bosque minish","Festival, espada rota y primera mazmorra",[
- ["Juega el festival con Zelda (te da el escudo pequeño) y asiste a la ceremonia del castillo. El rey Daphness te entrega la espada rota.",["blade"]],
- ["De vuelta en la Ciudadela, compra en la tienda de Aiyer la <b>bolsa más grande</b> (300 rupias). Cuesta 80 en USA; el precio europeo puede variar. Los logros de 100 y 300 rupias saldrán solos al juntar ese dinero.",["rupee100","rupee300"]],
- ["Bosque minish: tras la escena de Ezero, ve al oeste de la entrada del Sepulcro del bosque: <b>TC 1</b>.",[]],
- ["Comunidad minish del bosque: el frutabel está en la casa con forma de barril.",["jabber"]],
- ["Pasa al este de la casa de Festa para el <b>TC 2</b>. Revisa la lápida al norte de la casa de Inventín para activar la <b>marca del viento</b> del bosque.",["map"]],
- ["Sepulcro del bosque: vence a Imos y abre el cofre grande. Usa la salida sur tras Imos (<b>TC 3</b>) y la baldosa azul de teletransporte (<b>TC 4</b>).",["gust","heart4"]],
- ["<b>Jefe: gran chuchu verde sin daño.</b> Guarda en la puerta y reinicia al primer golpe.",["b_green"],1],
- ["Recoge el contenedor de corazón y el elemento.",["earth"]]
+["Prólogo y Sepulcro del bosque","Cómo empieza todo y la regla de los jefes",[
+ ["Juega el festival con Zelda y asiste a la ceremonia del castillo: el rey te da la espada minish rota. Sal por la Pradera al sur de Hyrule hacia el Bosque minish y consigue el frutabel en la casa con forma de barril para entender a los minish.",["blade","jabber"]],
+ ["<b>Regla de oro de los jefes.</b> Los seis jefes de mazmorra solo se pelean una vez, así que sus logros sin daño se pierden si terminas el combate con un golpe recibido. Guarda justo antes de la puerta del jefe y, si te tocan, reinicia (A + B + Start + Select) <b>antes de que el jefe caiga</b> y vuelve a entrar.",[],1],
+ ["Sepulcro del bosque: consigue el jarrón mágico y vence a Imos.",["gust"]],
+ ["<b>Jefe 1 de 6: gran chuchu verde sin daño.</b> Es el más sencillo: úsalo para practicar el método de guardar y reiniciar. Luego recoge el contenedor y el elemento de tierra.",["b_green","earth"],1]
 ]],
-["Tras la primera mazmorra","Bombas, piedras de la suerte y la primera botella",[
- ["Al oeste de la Comunidad minish, Inventín te da el saco de bombas.",["bombbag"]],
- ["Ciudadela: el vendedor bolsas te da la bolsa para piedras. <b>Desde aquí sigue el checklist de uniones de Thonky</b> (está en inglés; usa la tabla de equivalencias).",[]],
- ["Dojo de Tesshin (al sur de la Ciudadela): <b>Ataque circular</b>, pergamino del tigre 1 de 8.",[]],
- ["Activa las marcas del viento de la Ciudadela (salida norte) y de la Pradera al sur de Hyrule (al norte de la casa de Link).",[]],
- ["Tu primera unión abre un árbol en la Pradera al sur de Hyrule: <b>TC 5</b>. Une piedras con Smith: aparece un cofre en la Colina del este con una <b>botella</b>.",[]],
- ["Meseta Beele (salida oeste, un poco al sur, escaleras): pon una bomba en la pared agrietada, devuelve las nueces del matorral mercader con el escudo y cómprale una <b>botella</b>. Cuesta 20 en USA y algunas guías europeas indican 60: lleva al menos 60. La necesitas para subir el Monte Gongol.",[]]
+["Tras el Sepulcro del bosque","Aquí están las trampas más tempranas",[
+ ["Inventín (al oeste de la Comunidad minish) te da el saco de bombas. En la Ciudadela, el vendedor bolsas te da la bolsa para piedras y Tesshin te enseña el ataque circular, necesario para que te dejen subir al Monte Gongol.",["bombbag"]],
+ ["<b>Arco y flechas de luz (primera mitad).</b> En cuanto tengas una piedra roja de dientes irregulares, únela con el Forastero, en la casa de techo amarillo al sur de correos. Pisa la baldosa que aparece junto a la casa de Link, sube y, en la habitación del norte, <b>aspira con el jarrón mágico al fantasma que ronda al abuelo en cama</b>. Si no lo espantas, el abuelo muere y las flechas de luz se pierden para siempre.",[],1],
+ ["<b>Compra el bumerán</b> en la tienda de Aiyer apenas tengas el dinero. Más adelante, la misión de los hermanos de Tingle lo convierte en bumerán mágico y ya no podrás comprar el normal.",["boom"],1],
+ ["<b>Completa las 22 primeras uniones antes de ir al Bosque del oeste.</b> Salen con gente al azar de la Ciudadela, el Bosque minish y el Monte Gongol. Si llegas a la escena de Vaati y el rey con algunas pendientes, varias de las siguientes uniones cambian de persona y cuesta mucho más encontrarlas. Están en «Listas → Uniones», etapa 1.",[],1],
+ ["Para subir el Monte Gongol necesitas una botella (cómprasela al matorral mercader de la Meseta Beele) y el anillo escalada, que vende otro matorral mercader dentro del monte.",["grip"]]
 ]],
-["Monte Gongol y Cueva de las llamas","Anillo escalada, segundo elemento y espada blanca",[
- ["Falda del monte Gongol: pon una bomba entre dos árboles al oeste (<b>TC 6</b>). Llena una botella con agua del monte Gongol cuando el juego lo pida; más adelante sirve para el néctar azul.",[]],
- ["Cómprale el anillo escalada al matorral mercader de la cueva (40 rupias en USA). En el Monte Gongol, pon una bomba entre dos rocas al oeste (<b>TC 7</b>). Activa la marca del viento al sur de la Cueva de las llamas.",["grip"]],
- ["Fuente de la gran hada colibrí, en la pared sureste del Monte Gongol (cartel que prohíbe tirar bombas): lanza una bomba y responde <b>«Ninguna de las dos»</b>. Saco de bombas más grande.",["packing"]],
- ["Cueva de las llamas: consigue el bastón revés. En el centro del sótano está el <b>TC 8</b>.",["cane"]],
- ["<b>Jefe: Gleeok sin daño.</b> Guarda antes. Las rocas que caen se pueden leer con calma.",["b_gleerok"],1],
- ["Contenedor y elemento.",["fire"]],
- ["Melta te entrega la espada reforjada. Llévala al Santuario del castillo.",["white","eos1"]]
+["Cueva de las llamas","Segundo elemento y espada blanca",[
+ ["Cueva de las llamas: consigue el bastón revés.",["cane"]],
+ ["<b>Jefe 2 de 6: Gleeok sin daño.</b> El daño viene sobre todo de las rocas que caen, que se pueden anticipar. Por si acaso, no abras el menú durante el combate. Luego, contenedor y elemento de fuego.",["b_gleerok","fire"],1],
+ ["Melta reforja tu espada en la espada blanca. Llévala al Santuario del castillo para infundir tierra y fuego.",["white","eos1"]]
 ]],
-["Sacarle jugo al bastón revés","Contenido opcional que conviene hacer ya",[
- ["Colina del este: usa el bastón en un agujero y llega a la gran hada mariposa. Acepta tirar todas tus rupias: bolsa de 500. Hazlo con poco dinero encima.",[]],
- ["<b>Compra el bumerán</b> en la tienda de Aiyer (300 rupias en USA) ahora. Siempre antes de conseguir el bumerán mágico.",["boom"],1],
- ["Botella con comida para perros: entra encogido detrás del mostrador de Aiyer, llévate la botella y dale la comida al perro de su casa junto al Lago Hylia (se llega por la Granja Lon Lon).",[]],
- ["Tingle (Pradera al sur de Hyrule, en un saliente cerca de la salida a la Colina del este; sube con el bastón): une piedras y <b>vuelve a hablarle</b>. Si no, Angle, Nangle y David Jr. no aparecen.",[]],
- ["Escultor Minitendo: voltea la vasija grande de la Cafetería Mamá con el bastón, encógete, sal al oeste por la tabla, crece en la cabaña y entra al árbol del sur. Empieza las figuritas (reglas en «Coleccionables»).",[]],
- ["Plaza de la Ciudadela: limpia la alfombra polvorienta con el jarrón mágico. Terry se instalará ahí y venderá néctar.",[]],
- ["Tesshin: <b>Romperrocas</b> (pergamino 2). Tosshin: sube las paredes del lado este del Monte Gongol, divídete en dos para los interruptores y aprende la <b>Estocada circular</b> (pergamino 3); en su dojo está el <b>TC 12</b>.",[]],
- ["Tienda de Aiyer: compra el carcaj grande y el saco de bombas más grande (600 cada uno en USA). <b>Ese saco no existe en la europea original: lo añade el parche.</b> Si aún no aparece, vuelve más adelante.",["packing"]],
- ["Trozos de esta etapa: trastienda de la posada Doncellas, encogiéndote en la casa de Romeo y subiendo por la enredadera (<b>TC 9</b>); Pradera al norte de Hyrule, rompe una roca al noroeste y baja (<b>TC 10</b>); agujero del norte de la Granja Lon Lon con el bastón hacia la Cascada Xera (<b>TC 11</b>).",[]]
+["Con el bastón revés en mano","Dos cosas que conviene abrir ya",[
+ ["<b>Tingle</b> está en un saliente de la Pradera al sur de Hyrule: sube con el bastón, une piedras y <b>vuelve a hablarle</b>. Si no lo haces, Angle, Nangle y David Jr. no aparecen por Hyrule y su misión (el bumerán mágico) se queda parada.",[],1],
+ ["Abre el Escultor Minitendo: voltea la vasija grande de la Cafetería Mamá, encógete, sal al oeste por la tabla, crece en la cabaña y entra al árbol del sur. Desde aquí puedes cambiar caracolas por figuritas.",[]],
+ ["<b>Nunca cambies caracolas cuando la probabilidad sea 0%.</b> Pasa cuando ya ganaste todas las figuritas desbloqueadas: si insistes, un bug puede darte una figurita corrupta y la medalla del Club Minitendo queda imposible. Cuando diga que no hay nuevas, avanza en la historia.",[],1],
+ ["Gran hada mariposa (Colina del este, usa el bastón en un agujero): acepta tirar todas tus rupias y te sube la bolsa a 500. Hazlo con poco dinero encima.",[]]
 ]],
-["Rumbo a la Región inexplorada de Tabanta","Botas de Pegaso, arco y bolsa máxima",[
- ["Bosque del oeste: escena de Vaati suplantando al rey. Se desbloquean nuevas uniones y llegan Din, Nayru y Farore a la posada Doncellas.",[]],
- ["Intenta cruzar la Región inexplorada de Tabanta y habla con el minish del escritorio de Lem. Entra encogido a la casa de la Granja Lon Lon y rompe las vasijas de la esquina: llave de la granja para Taron.",["llrkey"]],
- ["Sirope (noreste del Bosque minish) vende la seta despertador (60 rupias en USA). Despierta a Lem y recibe las botas.",["mushroom","boots"]],
- ["Tesshin: <b>Ataque Pegaso</b> (pergamino 4). Embiste el árbol de la Granja Lon Lon, encógete y sigue el camino minish: <b>TC 14</b>.",[]],
- ["Casa del alcalde Hagar: puerta este, baja la escalera por una piedra de la suerte roja y únela con él. Se vacía el estanque de la Granja Lon Lon: <b>bolsa de 999</b>.",[]],
- ["Misión Goron: une piedras con el goron del suroeste de la Granja Lon Lon (usa los remolinos; en PAL pueden ser invisibles) y después con <b>Ine</b>, el granjero de arriba en la Colina del este. El parche corrige su bug, pero abre el menú de unión solo cuando tengas la pieza correcta y no canceles.",[],1],
- ["Región inexplorada de Tabanta: consigue el arco y flechas, activa la marca del viento (al fondo de la zona norte) y encógete en el punto noroeste para la arcada del agua sureste (<b>TC 30</b>). La tumba de Tesshin I está aquí: vuelve con 7 pergaminos.",["bow","map"]]
+["Rumbo a la Región inexplorada de Tabanta","Botas, arco y el aviso de Ine",[
+ ["Entra al Bosque del oeste: escena de Vaati y el rey. Después, habla con el minish del escritorio de Lem, busca la llave de la granja en la Granja Lon Lon, compra la seta despertador a Sirope y despierta a Lem para recibir las botas de Pegaso.",["llrkey","mushroom","boots"]],
+ ["<b>Ine</b>, el granjero de la derecha en la Colina del este: abre el menú de unión solo cuando tengas su pieza (azul cuadrada) y <b>no canceles</b>. En la ROM europea sin parchear ese bug dejaba su unión perdida para siempre, y con ella la cuarta botella, el escudo espejo y el trofeo. Tu parche lo corrige, pero no cuesta nada tener cuidado.",[],1],
+ ["Región inexplorada de Tabanta: consigue el arco y flechas y une las tres piedras doradas de las estatuas del suroeste para abrir el camino al Arco de los vientos.",["bow"]]
 ]],
-["Arco de los vientos","Guantes de topo, ocarina y el primer zumo mágico",[
- ["Consigue los guantes de topo. La sala inferior derecha del primer piso guarda el <b>TC 17</b>.",["mitts"]],
- ["<b>Jefe: Hisse sin daño.</b> Guarda antes.",["b_mazaal"],1],
- ["Contenedor y ocarina del viento.",["ocarina"]],
- ["Farmeo de rupias: cava con los guantes de topo a la izquierda de la puerta de la casa de Link; siempre sale una rupia roja. Entra y sal de la casa y repite.",["rupee500","rupee999"]],
- ["Zumo 1: une una piedra de la suerte roja con <b>Farore</b> en la posada Doncellas. Aparece Gorman con una casa en alquiler. Habla con él y ofrécesela a <b>Din</b>. Visítala con una botella vacía, recibe su zumo mágico y <b>bébelo</b>.",["din"],1],
- ["Ruinas de los vientos: une piedras con el minish del bosque de la grieta y sube el tallo: carcaj más grande. Encógete en el segundo punto, vuelve y baja por la enredadera del medio: <b>TC 31</b>.",["packing"]],
- ["Muros extraños para la misión Goron (guantes de topo): cueva de la Colina del este junto a la granja de Ine y Moni, cueva cerca de las escaleras de Sirope, norte de la Meseta Beele y la cueva junto al Ermitaño de Gongol (ahí también está el <b>TC 23</b>). El del Lago Hylia requiere la capa Roc.",[]],
- ["Néctar en el puesto de Terry: al principio solo blanco, rojo y verde. Compra lechera Lon Lon (Maron, en la Ciudadela) y llévala al investigador minish de la casa barril; después agua del monte Gongol; después poción roja de Sirope (requiere una unión). Cada entrega desbloquea amarillo, azul y naranja. <b>Precios europeos:</b> blanco, rojo y verde 100; amarillo y azul 200; naranja 300.",["pico_red","pico_yellow","pico_blue","pico_orange"]],
- ["Une piedras con el cartero que corre por la Ciudadela. En la oficina de correos aparece una empleada nueva: haz el pedido de las lecciones de Tesshin (200 rupias en USA) y vuelve de vez en cuando a recoger las nuevas. El logro salta al tenerlas todas.",["news"]],
- ["Habla con el minish del Lago Hylia: se abre la biblioteca.",[]]
+["Arco de los vientos","Tercer jefe y el primer zumo mágico",[
+ ["Consigue los guantes de topo.",["mitts"]],
+ ["<b>Jefe 3 de 6: Hisse sin daño.</b> Aprende el patrón de sus manos antes de arriesgarte. Luego, contenedor y ocarina del viento.",["b_mazaal","ocarina"],1],
+ ["<b>Primer zumo mágico.</b> Une una piedra roja de dientes largos con Farore en la posada Doncellas: aparece Gorman con una casa en alquiler. Habla con él y <b>dale la casa a Din</b>. Visítala con una botella vacía y bebe su zumo. Solo se construyen dos casas para las tres, así que el reparto importa: tu partida principal debe quedarse con Din y Farore, que son los útiles contra Vaati.",["din"],1]
 ]],
-["Biblioteca y Templo de las aguas","Tercer elemento",[
- ["Libro 1, «Libro ilustrado de los animales»: casa de Julieta (la chica del gato).",["book1"]],
- ["Encógete y entra por la fuente de la Ciudadela: muñequera. Libro 2, «Leyendas de los minish»: casa del Dr. Left; ordena las estanterías, sube a las vigas, aspira el polvo con el jarrón mágico para ver las baldosas, crea un clon y súbete al libro.",["bracelets","book2"]],
- ["Libro 3, «Todo sobre las máscaras»: cabaña del alcalde Hagar en el Lago Hylia; empújalo del estante estando encogido.",["book3"]],
- ["El anciano Librari te lleva por las cloacas hasta las aletas.",["flippers"]],
- ["Con las aletas: bucea en el estanque junto a la casa de Aiyer (<b>TC 24</b>), ve al oeste de la cabaña del alcalde (<b>TC 25</b>) y entra al árbol de <b>Hasshin</b>: Ataque supervivencia (pergamino 5) y <b>TC 26</b>.",[]],
- ["Templo de las aguas: candil.",["lantern"]],
- ["<b>Minijefe: gran chuchu azul sin daño.</b> Guarda antes de entrar a su sala.",["b_bluechu"],1],
- ["<b>Jefe: Octorok gigante sin daño.</b> Hielo, oscuridad y rocas del techo: paciencia y lectura de sus embestidas.",["b_octo"],1],
- ["Contenedor, elemento y visita al Santuario.",["water","eos2"]],
- ["Une piedras con Inventín: saco de bombas máximo. Une piedras con Gentel, el anciano de la Comunidad minish: Inventín te ofrece la bomba con control remoto (hablando con él puedes volver a las normales).",["remote","packing"]],
- ["Entrada del Valle real: pon una bomba en la pared entre las dos vallas bajas y responde bien a la gran hada libélula: carcaj máximo.",["packing"]]
+["El elemento de agua","Biblioteca, aletas y dos jefes seguidos",[
+ ["Consigue la muñequera (encógete por la fuente de la Ciudadela) y los tres libros de la biblioteca. Librari te lleva por las cloacas hasta las aletas.",["bracelets","book1","book2","book3","flippers"]],
+ ["<b>Une piedras con Librari</b> mientras estés en la biblioteca (unión 66, verde de corte inclinado). Al revivir la espada cuádruple, la biblioteca cierra para siempre; si te quedas sin hacerla ahí, tendrás que esperar a encontrarlo en el Lago Hylia mucho después.",[],1],
+ ["Templo de las aguas: consigue el candil.",["lantern"]],
+ ["<b>Jefe 4 de 6: gran chuchu azul sin daño.</b> Es el minijefe del templo, así que guarda también antes de su sala, no solo antes del jefe final.",["b_bluechu"],1],
+ ["<b>Jefe 5 de 6: Octorok gigante sin daño.</b> Suelo de hielo, oscuridad, rocas del techo y embestidas: juega a la defensiva y ataca solo en ventanas seguras. Luego, contenedor, elemento de agua y Santuario.",["b_octo","water","eos2"],1]
 ]],
-["Mausoleo real y camino a las nubes","Kusshin, Cascada Xera y Sobre las nubes",[
- ["Dumper te da la llave del cementerio; un cuervo la roba. Embiste con las botas el árbol donde se posa y abre el cementerio.",["gravekey"]],
- ["Tumba superior izquierda del cementerio: <b>TC 27</b>. Termina el Mausoleo real.",[]],
- ["Jardines del castillo de Hyrule: corta los arbustos de la esquina sureste, baja la escalera y enciende las antorchas con el candil. <b>Kusshin</b>: Ataque con rayo (pergamino 6) y <b>TC 21</b>.",[]],
- ["Cascada Xera: trozo en el agua de la entrada (<b>TC 29</b>) y otro detrás de una cascada (<b>TC 37</b>). Activa la marca del viento al subir la pared.",[]],
- ["Sobre las nubes: marca del viento al sur de la casa grande. Gracias al parche también puedes llamar a los pájaros desde la azotea de la torre. La marca del Lago Hylia (junto al templo) se activa sola.",["map"]],
- ["Segundas uniones con Din, Nayru y Farore (disponibles desde que llegó Gorman): las mariposas Felicidad aparecen en las Ruinas de los vientos, el cementerio y la Región inexplorada de Tabanta.",["inner"]]
+["Hacia las nubes","Tramo sin trampas",[
+ ["Cementerio del Valle real: Dumper te da la llave del cementerio (un cuervo la roba: embiste su árbol con las botas) y completas el Mausoleo real. El espíritu del rey Gustaf te da la piedra dorada para abrir la fuente del flujo en la Cascada Xera.",["gravekey"]],
+ ["Sobre las nubes: une las cinco piedras doradas de las nubes para que aparezca el remolino rojo hacia la casa de los hijos del viento, que te llevan al Palacio de los vientos.",[]]
 ]],
-["Palacio de los vientos","Cuarto elemento",[
- ["Capa Roc. En el cuarto piso, busca un pasillo bajo una rejilla: <b>TC 32</b>.",["cape"]],
- ["<b>Jefe: pareja de Gyorg sin daño.</b> Guarda antes; el camino de vuelta incluye el laberinto.",["b_gyorg"],1],
- ["Contenedor, elemento de aire y espada cuádruple en el Santuario.",["wind","four"]]
+["Palacio de los vientos","El jefe más duro de los seis",[
+ ["Consigue la capa Roc.",["cape"]],
+ ["<b>Jefe 6 de 6: pareja de Gyorg sin daño.</b> El más difícil del grupo y el camino de vuelta incluye el laberinto del palacio, así que guarda en la puerta. En las fases con Gyorg pequeños, las burbujas desbaratan a tus clones: espera aperturas limpias. Luego, contenedor y elemento de aire.",["b_gyorg","wind"],1],
+ ["Santuario: infunde el cuarto elemento y consigue la espada cuádruple.",["four"]]
 ]],
-["Limpieza antes del castillo","Con la capa Roc y la espada cuádruple todo se abre",[
- ["Tesshin: <b>Estocada inferior</b> (pergamino 7). Con los 7, ve a la tumba de la Región inexplorada de Tabanta: <b>Gran ataque circular</b> de Tesshin I (pergamino 8) y <b>TC 16</b>.",["tiger"]],
- ["Técnicas sin pergamino: une piedras con Tosshin (cascada noreste de la Región inexplorada de Tabanta: Goro), con Hasshin del Lago Hylia (cascada de la Pradera al norte de Hyrule: Shichiro) y con Kusshin (cascada de la Cascada Xera: otro maestro que en español también se llama Hasshin).",["inner"]],
- ["Hermanos de Tingle: Angle (cueva del corral de la Granja Lon Lon, divídete para empujar el bloque), Nangle (Meseta Beele) y David Jr. (Lago Hylia). Pisa el interruptor dentro de cada uno de los cuatro árboles de la Pradera al norte de Hyrule y baja por la escalera central.",["magicboom"]],
- ["Con la capa Roc: isla del Lago Hylia (<b>TC 33</b>), cueva con tallo (<b>TC 34</b>), cueva que lleva a la Granja Lon Lon (<b>TC 35</b>), campana de la Ciudadela planeando (<b>TC 42</b>), salto al final del puente en la cueva de la muñequera (<b>TC 41</b>).",[]],
- ["Último muro extraño en el Lago Hylia (salta desde el muelle de Aiyer). Con los seis goron, entra a la cueva de los Goron (se llega saltando a un remolino al sur de la Granja Lon Lon y yendo al oeste; si no lo ves, usa la capa Roc): rupias y la <b>cuarta botella</b>. Une piedras con el goron de la derecha para despertar a Biggoron (servirá tras los créditos).",["bottles"]],
- ["Camino minish del patio del Colegio Fabuloso (<b>TC 40</b>). Anciano Librari en el Bosque minish: <b>sexto contenedor</b>. Bloques del noreste de la Región inexplorada de Tabanta (<b>TC 36</b>), cueva de la Cascada Xera tras la unión al este de la casa de Festa (<b>TC 38</b>), cueva minish del Bosque minish (<b>TC 43</b>), noroeste del Bosque minish desde el Lago Hylia (<b>TC 13</b>), tallo de Melta (<b>TC 15</b>), árbol del Bosque del oeste (<b>TC 18</b>), tallo de la Colina del este (<b>TC 20</b>), fuente de los Jardines del castillo (<b>TC 22</b>), arcada minish de la Pradera al sur de Hyrule (<b>TC 28</b>).",[]],
- ["Juego de los cucos de Anju: completa todos los niveles para el <b>TC 39</b>.",[]],
- ["<b>Sala de juegos de Vesga (TC 19): copia tu archivo antes.</b> Hay un reporte de que morir en la simulación hizo desaparecer el trozo para siempre.",[],1],
- ["<b>Arco y flechas de luz:</b> une piedras con el Forastero (casa al sur de la oficina de correos), usa la baldosa que aparece junto a la casa de Link, sube y <b>aspira con el jarrón mágico al espíritu que ronda al Abuelo Huracán</b>. Vuelve más tarde, cuando esté de pie. Si no lo espantas, el abuelo muere y pierdes las flechas.",["light"],1],
- ["<b>Truco de los zumos mágicos.</b> Une una piedra roja con Mita, el carpintero junto a correos; Muto construye la segunda casa. <b>Antes de asignarla, copia tu archivo</b> (ranura 1 a ranura 2). En la ranura 2 dásela a <b>Nayru</b>, recibe su zumo y bébelo. Reinicia, carga la ranura 1 y dásela a <b>Farore</b>; bebe su zumo. Tu partida principal queda con Din y Farore, los útiles para Vaati.",["nayru","farore"],1],
- ["Néctar verde <b>antes de la medalla del Club Minitendo</b> y blanco <b>antes del trofeo Tingle</b>. Revisa en «Coleccionables» las condiciones de cada néctar.",["pico_green","pico_white"],1],
- ["Figuritas: llega a 130 antes del final y habla un par de veces con Orwen, fuera de la Cafetería Mamá. Abre la casa del robot: <b>TC 44</b>, 600 rupias y el fonógrafo.",[]],
- ["Haz todas las uniones posibles. Algunas solo se abren tras la espada cuádruple y al salir del Castillo de Hyrule tenebroso.",["fuse50"]],
- ["Comprueba que tienes las 8 marcas del viento y el mapa completo.",["map"]]
+["Repaso antes del castillo","Todo lo que conviene cerrar ahora",[
+ ["<b>Los otros dos zumos mágicos.</b> Une una piedra roja con Mita, junto a correos, y Muto construye la segunda casa. <b>Antes de asignarla, copia tu archivo</b> a otra ranura. En la copia dásela a Nayru y bebe su zumo; vuelve a tu archivo principal y dásela a Farore. Es el único punto del juego donde una sola partida no alcanza.",["nayru","farore"],1],
+ ["<b>Néctar verde y blanco a tiempo.</b> El verde necesita que encuentres una caracola misteriosa, y las caracolas desaparecen al conseguir la medalla del Club Minitendo. El blanco necesita que encuentres una piedra de la suerte, y dejan de salir al completar las 100 uniones. Bébelos antes de cerrar esas dos cosas.",["pico_green","pico_white"],1],
+ ["<b>Simulación de Vesga: copia tu archivo antes de jugarla.</b> Hay un reporte de un jugador al que morir ahí le hizo desaparecer ese trozo de corazón para siempre.",[],1],
+ ["<b>Arco y flechas de luz (segunda mitad).</b> Vuelve por la baldosa junto a la casa de Link a la habitación del abuelo. Cuando lo encuentres levantado, háblale y te entrega las flechas. Si sigue en cama, avanza un poco más y vuelve.",["light"],1],
+ ["<b>Cierra las uniones de la Ciudadela antes de entrar al Castillo de Hyrule tenebroso.</b> Al entrar, muchos vecinos huyen del pueblo y sus uniones pendientes saltan a otra gente repartida por Hyrule: no se pierden, pero encontrarlas se vuelve un peregrinaje.",[],1],
+ ["<b>130 figuritas antes de los créditos.</b> Con esa cifra, Orwen (fuera de la Cafetería Mamá) abre la casa del robot: trozo de corazón, 600 rupias y el fonógrafo. Si llegas al final con menos, esa casa queda esperando a que consigas la medalla completa después.",[],1],
+ ["Repasa las tres listas y la pestaña de logros para ver qué te falta: uniones, trozos y contenedores, figuritas, botellas, pergaminos, marcas del viento y mejoras de equipo.",["tiger","map","bottles","packing","inner","news"]]
 ]],
-["Castillo de Hyrule tenebroso y Vaati","Final del juego",[
- ["Confirma que usas BIOS real. Guarda antes de la sala de los remolinos.",[],1],
- ["Derrota a Vaati y <b>guarda tras los créditos</b>. Tu archivo tendrá un triángulo y al cargarlo volverás antes del combate final.",["hero"]]
-]],
-["Tras los créditos","Lo que solo existe después del final",[
- ["El Escultor Minitendo tiene 6 figuritas nuevas. Al completar las 136 recibes la medalla del Club Minitendo (si no abriste antes la casa de Orwen, enséñale la medalla ahora).",["carlov"]],
- ["Cima de la Cascada Xera: equipa el escudo y dáselo a Biggoron. Recorre Hyrule un rato y vuelve.",["mirror"]],
- ["Últimas uniones con las pistas de «Coleccionables». <b>Habla con Tingle después de la unión 100</b>: el logro salta cuando te da el trofeo, no antes.",["tingle"],1],
- ["Último trozo de corazón: 20 corazones. Si te falta uno, revisa qué TC no marcaste; recuerda que en PAL uno se alcanza con la capa Roc.",["hearts20"]],
- ["<b>Vaati sin daño</b> con el equipo completo: Gran ataque circular con las tres técnicas ocultas, las tres mariposas Felicidad, bumerán mágico y los zumos mágicos de Din y Farore embotellados.",["b_vaati"]]
+["Castillo de Hyrule tenebroso y Vaati","El final",[
+ ["<b>Antes de entrar, confirma que usas una BIOS real de GBA</b> y guarda al llegar a la sala de los remolinos: es donde la versión europea se cuelga y hay quien perdió la partida entera ahí.",[],1],
+ ["Tras revivir la espada cuádruple puedes salir del castillo y volver cuando quieras. Las tres últimas uniones (98 a 100) se abren justo en ese momento.",["fuse50"]],
+ ["Derrota a Vaati. Su logro sin daño <b>no es perdible</b>: al guardar después de los créditos, el juego te deja otra vez antes del combate final, así que puedes intentarlo con calma y con todo el equipo.",["hero"],1],
+ ["<b>Guarda después de los créditos.</b> Tu archivo queda marcado con un triángulo y desde ahí se completa lo que falte.",[],1]
 ]]
+];
+
+/* Fuera de la ruta: lo que solo existe tras los créditos */
+const POST = [
+ ["Las 6 figuritas nuevas del Escultor Minitendo y la medalla del Club Minitendo.",["carlov"]],
+ ["Biggoron, en la cima de la Cascada Xera: dale tu escudo equipado y vuelve tras dar una vuelta.",["mirror"]],
+ ["Las uniones que falten y el trofeo Tingle: habla con él después de la número 100.",["tingle"]],
+ ["El último trozo de corazón hasta llegar a 20.",["hearts20"]],
+ ["Vaati sin daño, con el equipo completo.",["b_vaati"]]
 ];
 
 const MISS = [
@@ -533,13 +542,13 @@ const MISS = [
   how:"Cómpralo en cuanto puedas tras la bolsa de 500, y siempre antes de terminar la misión de los hermanos de Tingle."},
  {h:"Tingle Trophy", a:["tingle"],
   why:"RA lo marca como perdible. Un speedrunner de 100% explica que en USA y Japón no hay uniones perdibles; la única trampa era la unión con Ine de la ROM europea, que tu parche corrige.",
-  how:"Sigue el checklist de Thonky desde que tengas la bolsa para piedras, y con Ine no canceles la unión por si acaso. Tras la unión 100 habla con Tingle, a veces dos veces, para recibir el trofeo."},
+  how:"Marca cada una en «Listas → Uniones» desde que tengas la bolsa para piedras, y con Ine no canceles la unión por si acaso. Tras la unión 100 habla con Tingle, a veces dos veces, para recibir el trofeo."},
  {h:"Stayin' Alive (20 corazones)", a:["hearts20"],
   why:"Marcado como perdible. Un jugador reportó que morir en la simulación de Vesga eliminó ese trozo para siempre, y varios jugadores europeos no encontraron su último trozo.",
   how:"Copia tu archivo antes de la sala de juegos de Vesga. Marca cada TC en la ruta; en PAL hay uno que parece inalcanzable pero se consigue con la capa Roc."},
  {h:"These Aren't Lighter! (arco y flechas de luz)", a:["light"],
-  why:"Thonky advierte que si no espantas al espíritu que ronda al Abuelo Huracán, él muere y las flechas de luz desaparecen.",
-  how:"Nada más entrar a su cuarto, aspira al espíritu con el jarrón mágico y vuelve más tarde a hablar con él."},
+  why:"Las guías advierten que si no espantas al fantasma que ronda al abuelo en cama (unión 3 con el Forastero), él muere y las flechas de luz desaparecen.",
+  how:"Haz la unión 3 con el Forastero temprano, aspira al fantasma con el jarrón mágico en cuanto entres al cuarto y vuelve más tarde a hablar con el abuelo."},
  {h:"Shell-phone y Just My Luck (néctar verde y blanco)", a:["pico_green","pico_white"],
   why:"La comunidad pide que se marquen como perdibles: tras la medalla del Club Minitendo ya no aparecen caracolas misteriosas, y tras el trofeo Tingle las piedras de la suerte dejan de salir por el mundo.",
   how:"Bebe el verde y encuentra una caracola antes de terminar las figuritas; bebe el blanco y encuentra una piedra antes de la unión 100."},
@@ -599,11 +608,277 @@ const BOSSES = [
  {n:"Gran chuchu verde (Sepulcro del bosque)", k:"b_green", body:`<p>El más sencillo del set y buena práctica para el método de guardar en la puerta y reiniciar.</p>`}
 ];
 
+/* ================= LISTAS COMPLETAS ================= */
+const PIECE = {
+ gd:["g","verde, diente cuadrado"], gi:["g","verde, corte inclinado"], gc:["g","verde, cuña triangular"],
+ bs:["b","azul, curva en S"], bc:["b","azul, cuadrada"],
+ rl:["r","roja, dientes largos"], rj:["r","roja, dientes irregulares"], rc:["r","roja, cuña triangular"],
+ au:["o","dorada"]
+};
+const RND = "Cualquier persona (unión aleatoria)";
+/* [n, quién y dónde, pieza, resultado, aviso?] */
+const FUS = [
+ ["Las 22 primeras","Antes de la escena de Vaati y el rey en el Bosque del oeste. Casi todas salen con gente al azar: recorre la Ciudadela, el Bosque minish y el Monte Gongol (el Ermitaño de Gongol casi siempre tiene). Necesitas 5 verdes de diente cuadrado, 5 de corte inclinado y 7 de cuña triangular. Si no las completas antes de esa escena, algunas de las siguientes pueden cambiar de persona.",[
+  [1,"Vendedor bolsas (Ciudadela, automática al entrar tras el Sepulcro del bosque)","bs","Se abre un árbol en la Pradera al sur de Hyrule, junto a la casa de Link: TC 5."],
+  [2,"Alcalde Hagar (Ciudadela, casa al norte de la plaza). La pieza está bajando la escalera de la puerta este de su casa","rl","Se vacía un estanque del corral de la Granja Lon Lon: cueva con la bolsa de 999 rupias."],
+  [3,"Forastero (Ciudadela, casa de techo amarillo del oeste, al sur de correos)","rj","Aparece una baldosa de teletransporte junto a la casa de Link: 3 piedras verdes y el abuelo con el fantasma (arco y flechas de luz).",1],
+  [4,RND,"gd","Cofre en el Bosque minish, al sur de donde conociste a Ezero: piedra roja."],
+  [5,RND,"gd","Cofre en el noroeste del Bosque minish (aún inaccesible): piedra azul."],
+  [6,RND,"gi","Se vacía un estanque en la Pradera al sur de Hyrule: cueva con 75 rupias."],
+  [7,RND,"gc","Aparece una cuerda dorada en los Jardines del castillo de Hyrule (figurita 113)."],
+  [8,RND,"gc","Se vacía una fuente de los Jardines del castillo: fuente con hadas."],
+  [9,RND,"gd","Cofre en el norte de la Granja Lon Lon (se llega por la Cascada Xera): 200 rupias."],
+  [10,RND,"gc","Cofre en el camino minish del patio del Colegio Fabuloso (aún inaccesible): piedra roja."],
+  [11,RND,"gc","Cofre en el camino minish hacia la Comunidad minish: 200 rupias."],
+  [12,RND,"gc","Cofre en el noroeste de la Pradera al norte de Hyrule (aún inaccesible): 200 caracolas."],
+  [13,RND,"gc","Cofre en el Bosque minish, cerca del Sepulcro del bosque: piedra roja."],
+  [14,RND,"gi","Cofre en el camino minish del corral de la Granja Lon Lon (aún inaccesible): piedra roja."],
+  [15,RND,"gi","Aparece una cuerda dorada en la Colina del este (figurita 113)."],
+  [16,RND,"gd","Cofre en el Bosque minish, cerca de la primera entrada que usaste: 200 rupias."],
+  [17,RND,"gd","Grieta junto al estanque de los dos nenúfares giratorios del Bosque minish: piedra azul."],
+  [18,RND,"gi","Cofre en la Pradera al sur de Hyrule, al este de la casa de Link: 200 caracolas."],
+  [19,RND,"gi","Aparece un Octorok dorado en el noroeste del Bosque minish (figurita 111)."],
+  [20,RND,"gc","Aparece un Tektite dorado en el Monte Gongol (figurita 112)."],
+  [21,RND,"bs","Se abre un árbol en la Pradera al norte de Hyrule: fuente con hadas."],
+  [22,RND,"rc","Se vacía la fuente de los Jardines del castillo: escaleras al TC 22."]
+ ]],
+ ["Tras la escena de Vaati y el rey","",[
+  [23,"Cartero (pasa corriendo por la plaza de la Ciudadela)","bc","La oficina de correos empieza a publicar las lecciones de Tesshin (la empleada nueva las vende)."],
+  [24,"Candy (posada Doncellas, niña de coletas del segundo piso)","bc","Aparece una plataforma en la Meseta Beele."],
+  [25,"El perro de Aiyer (su casa del Lago Hylia, por la Granja Lon Lon; encógete para unir)","gi","Cofre en el camino minish cerca de la cabaña del alcalde Hagar: piedra azul."],
+  [26,"Smith (casa de Link)","rc","Cofre en la Colina del este: botella."],
+  [27,"Smith (casa de Link)","gi","Cofre en la Meseta Beele: piedra roja."],
+  [28,"Tingle (Pradera al sur de Hyrule, saliente del este; sube con el bastón revés)","gi","Se abre un árbol en la Pradera al norte de Hyrule. Después de unir, vuelve a hablarle."],
+  [29,"Ine (Colina del este, granjero de la derecha)","bc","El goron de la Granja Lon Lon abre la cueva de los Goron. Abre el menú de unión solo con la pieza correcta y no canceles.",1],
+  [30,"Moni (Colina del este, granjero de la izquierda)","gd","Cofre en una cornisa de la pared del Monte Gongol: piedra azul."],
+  [31,"Goron fuera de la cueva de los Goron (suroeste de la Granja Lon Lon); si ya está abierta, el de más a la izquierda","bs","Un goron se instala en la Ciudadela vendiendo piedras (figurita 66)."],
+  [32,"Angle (Granja Lon Lon, vestido de morado)","gc","Se abre un árbol en la Pradera al norte con un interruptor de antorcha y una piedra roja."],
+  [33,"David Jr. (Lago Hylia, vestido de blanco)","gi","Se abre un árbol en la Pradera al norte con un interruptor de antorcha y 200 caracolas."],
+  [34,"Poemun (Meseta Beele, en un árbol abierto)","rl","Se levanta un árbol caído y puedes entrar a la casa de Poemun."],
+  [35,"Minish del bosque (Falda del monte Gongol, en la grieta junto a la semilla que regaste)","gd","Aparece un cofre cercano: 200 rupias."],
+  [36,"Minish de la montaña (junto a la salida oeste de la Mina de Melta)","gc","Cofre en el suroeste del Bosque minish: piedra azul."],
+  [37,"Melta (Mina de Melta)","rc","Crece un tallo gigante en la cima del Monte Gongol: TC 15."],
+  [38,"Minish de la montaña (junto a la puerta este de la Mina de Melta)","gd","Cofre en el camino minish con lluvia: piedra azul."],
+  [39,"Minish de la montaña (el de más a la izquierda que usa pico en la mina)","gi","Cofre en el camino minish de las aguas termales de Gongol: piedra azul."],
+  [40,"Matorral mercader (cueva del norte de la Región inexplorada de Tabanta)","bc","Se abre un árbol en el Bosque minish con un matorral mercader que vende piedras."],
+  [41,"Estatua extraña 1 (suroeste de la Región inexplorada de Tabanta)","au","Primera de tres estatuas."],
+  [42,"Estatua extraña 2 (suroeste de la Región inexplorada de Tabanta)","au","Segunda de tres estatuas."],
+  [43,"Estatua extraña 3 (suroeste de la Región inexplorada de Tabanta)","au","Con las tres, se rompe la roca que bloquea el camino al sur."]
+ ]],
+ ["Tras la ocarina del viento","",[
+  [44,"Minish del bosque (casa junto a la marca del viento del Lago Hylia)","rj","Se abre un árbol en el Bosque del oeste: TC 18."],
+  [45,"Farore (posada Doncellas, pelo verde, piso superior)","rl","Llega Gorman para alquilar la casa vacía (primer zumo mágico).",1],
+  [46,"Mita (junto a correos; aparece cuando una de las tres ya vive en la casa de Gorman)","rj","Muto construye otra casa (entra y sal de edificios un par de veces). Copia tu archivo antes de asignarla.",1],
+  [47,"Jil (junto a las tiendas con el robot y el fantasma en el techo)","gd","Aparece un nenúfar en la Región inexplorada de Tabanta."],
+  [48,"Mamá (Cafetería Mamá, pelirroja)","gc","Aparece una plataforma en el Lago Hylia frente a una cueva de guantes de topo."],
+  [49,"Muro extraño (Bosque minish: cava en la cueva junto a las escaleras de Sirope y despeja un muro del fondo)","bs","Llega un goron a la cueva de los Goron."],
+  [50,"Minish del bosque (casa oeste de la Comunidad minish)","gi","Aparece un nenúfar en la Región inexplorada de Tabanta."],
+  [51,"Minish del bosque (casa oeste de la Comunidad minish)","gc","Aparece un nenúfar en la Región inexplorada de Tabanta."],
+  [52,"Minish del bosque (esquina suroeste de la Colina del este)","bs","Crece un tallo en la Colina del este: TC 20, 200 rupias arriba y 200 caracolas a la izquierda."],
+  [53,"Matorral mercader (árbol del Bosque minish abierto en la unión 40)","gc","Aparece un Octorok dorado en el Bosque del oeste (figurita 111)."],
+  [54,"Matorral mercader (árbol del Bosque minish abierto en la unión 40)","gi","Grieta en la Región inexplorada de Tabanta: piedra roja."],
+  [55,"Muro extraño (cueva junto a la casa de Ine y Moni; cava para entrar)","bc","Llega un goron a la cueva de los Goron."],
+  [56,"Minish del bosque (esquina suroeste de la Pradera al sur; embiste el árbol para abrir el punto de encogerte y entra a la casita)","rc","Sirope empieza a preparar poción roja (necesaria para el néctar naranja)."],
+  [57,"Minish del bosque (suroeste del Bosque del oeste)","bc","Crece un tallo en el Bosque del oeste: rupias y una piedra roja."],
+  [58,"Muro extraño (cueva al norte de la entrada al Monte Gongol, en la Meseta Beele)","bc","Llega un goron a la cueva de los Goron."],
+  [59,"Nangle (Meseta Beele, vestido de azul)","gd","Se abre un árbol en la Pradera al norte con un interruptor de antorcha y una piedra roja."],
+  [60,"Minish del bosque (Meseta Beele, cerca de Nangle)","gc","Se vacía un estanque en la Meseta Beele: cueva con rupias."],
+  [61,"Minish del bosque (grieta en el este de la Pradera al norte de Hyrule)","gi","Cofre en las Ruinas de los vientos: 200 caracolas."],
+  [62,"Minish del bosque (grieta en la esquina superior derecha de los Jardines del castillo)","gd","Se levanta un árbol en el Bosque del oeste: tierra para cavar rupias."],
+  [63,"Tingle (Pradera al sur de Hyrule)","rj","Aparece un Tektite dorado en el Monte Gongol (figurita 112)."],
+  [64,"Minish del bosque (grieta en el suelo de las Ruinas de los vientos)","rl","Crece un tallo gigante en las Ruinas de los vientos: carcaj más grande."],
+  [65,"Muro extraño (cueva de guantes de topo junto a la del Ermitaño de Gongol; cava bajo un muro del fondo)","bs","Llega un goron a la cueva de los Goron."],
+  [66,"Librari (casa dentro de una estantería de la biblioteca)","gi","Aparece un Octorok dorado en las Ruinas de los vientos (figurita 111). La biblioteca cierra para siempre al revivir la espada cuádruple; si no alcanzas, más tarde Librari aparece en el Lago Hylia.",1]
+ ]],
+ ["Tras las aletas","",[
+  [67,"David Jr. (Lago Hylia)","gd","Cofre en el camino minish hacia la Mina de Melta: 200 caracolas."],
+  [68,"Minish del bosque (grieta en una cornisa del este del Lago Hylia; nada hasta una enredadera)","bc","Crece un tallo en el Lago Hylia: 200 rupias, 200 caracolas y un trozo de corazón."]
+ ]],
+ ["Tras el Templo de las aguas","",[
+  [69,"Inventín (al oeste de la Comunidad minish)","rj","Cofre en las Ruinas de los vientos: saco de bombas más grande."],
+  [70,"Gentel, el anciano minish (Comunidad minish)","rl","Inventín crea la bomba con control remoto."]
+ ]],
+ ["Tras el Mausoleo real","",[
+  [71,"Fantasma que ronda las tumbas del cementerio","bs","El encargado de la sala de juegos de la Ciudadela añade un nivel de dificultad."],
+  [72,"Fantasma que ronda las tumbas del cementerio","bc","Su hermano fantasma se va de la Ciudadela (figurita 67)."],
+  [73,"Dumper (cementerio)","bs","Se abre una tumba arriba a la derecha del cementerio (figurita 37)."],
+  [74,"Dumper (cementerio)","gc","Grieta en las Ruinas de los vientos: piedra roja."],
+  [75,"Ghini rosa (dentro de la tumba abierta en la unión 73)","gc","Se abre una cascada en la Ciudadela: 200 caracolas."],
+  [76,"Ghini rosa (dentro de la tumba abierta en la unión 73)","gc","Se levanta un árbol en el Bosque del oeste: cofre con 100 caracolas."],
+  [77,"Din (posada Doncellas, pelirroja)","rl","Mariposa Felicidad en las Ruinas de los vientos (disparas flechas más rápido)."],
+  [78,"Nayru (posada Doncellas, pelo azul)","rc","Mariposa Felicidad en el cementerio del Valle real (nadas más rápido)."],
+  [79,"Farore (posada Doncellas, pelo verde)","rj","Mariposa Felicidad en la Región inexplorada de Tabanta (cavas más rápido)."],
+  [80,"Brisa (casa sobre las nubes)","gd","Aparece una cuerda dorada en la Región inexplorada de Tabanta (figurita 113)."],
+  [81,"Brisa (casa sobre las nubes)","gd","Se levanta un árbol en el Bosque del oeste: tierra para cavar rupias."],
+  [82,"Caprice (casa sobre las nubes)","gi","Cofre en la Cascada Xera: piedra azul."],
+  [83,"Puerta de la fuente del flujo (Cascada Xera, subiendo por el puente)","au","Se abre la puerta. La pieza te la da el espíritu del rey Gustaf."],
+  [84,"Sam (Sobre las nubes)","gd","Aparece un Tektite dorado en la Cascada Xera (figurita 112)."],
+  [85,"Gale (Sobre las nubes)","rc","Se abre una cascada en la Cascada Xera: TC 37."],
+  [86,"Nube extraña 1 (Sobre las nubes, nube con una piedra encima)","au","Empieza a girar un molinete."],
+  [87,"Nube extraña 2","au","Empieza a girar un molinete."],
+  [88,"Nube extraña 3","au","Empieza a girar un molinete."],
+  [89,"Nube extraña 4","au","Empieza a girar un molinete."],
+  [90,"Nube extraña 5","au","Con todos los molinetes girando desaparece la nube y aparece el remolino rojo hacia la casa sobre las nubes."],
+  [91,"Maki (anciana del piso superior de la casa sobre las nubes)","gc","Cofre en el cementerio: piedra roja."],
+  [92,"Maki (anciana del piso superior de la casa sobre las nubes)","gd","Cofre en el cementerio: piedra roja."]
+ ]],
+ ["Tras el Palacio de los vientos","",[
+  [93,"Chinmin (maestra de pelo morado del Colegio Fabuloso; tiene un 10% de probabilidad, entra y sal varias veces)","gi","Cofre entre rocas en la Meseta Beele: piedra roja. Buena candidata para dejar al final."],
+  [94,"Muro extraño (cueva del norte del Lago Hylia, saltando por las plataformas)","bs","Llega el último goron a la cueva de los Goron."],
+  [95,"Hasshin (Lago Hylia)","rc","Se abre una cascada en la Pradera al norte: dojo de Shichiro (Gran ataque circular más largo)."],
+  [96,"Tosshin (Monte Gongol)","rj","Se abre una cascada en la Región inexplorada de Tabanta: dojo de Goro (cargas el ataque circular más rápido)."],
+  [97,"Kusshin (Jardines del castillo de Hyrule)","rl","Se abre una cascada en la Cascada Xera: dojo del otro Hasshin (te divides más rápido)."]
+ ]],
+ ["Tras revivir la espada cuádruple","Puedes (y debes) salir del Castillo de Hyrule tenebroso para hacerlas.",[
+  [98,"Goron de más a la derecha (cueva de los Goron)","rj","Biggoron despierta en la cima de la Cascada Xera (escudo espejo tras los créditos)."],
+  [99,"Minish del bosque (Comunidad minish; a su casa se llega nadando al este de la casa de Festa)","rl","Aparece una plataforma frente a una cueva de guantes de topo en la Cascada Xera: TC 38."],
+  [100,"Minish del bosque (el mismo de la unión 99)","rj","Grieta junto a la marca del viento del Lago Hylia: cueva hacia una casa minish donde Librari te da el sexto contenedor de corazón."]
+ ]]
+];
+
+/* Trozos de corazón: [n, zona, descripción, aviso?] */
+const TCS = [
+ [1,"Bosque minish","Al oeste de la entrada del Sepulcro del bosque, después de la escena del ataque a Ezero."],
+ [2,"Comunidad minish","Al este de la casa de Festa, en la pantalla siguiente."],
+ [3,"Sepulcro del bosque","Salida sur tras vencer a Imos."],
+ [4,"Sepulcro del bosque","Baldosa azul de teletransporte."],
+ [5,"Pradera al sur de Hyrule","Árbol que abre tu primera unión (unión 1)."],
+ [6,"Falda del monte Gongol","Cueva que se abre con una bomba entre dos árboles, al oeste."],
+ [7,"Monte Gongol","Cueva que se abre con una bomba entre dos rocas, a la derecha de una pared rocosa del oeste."],
+ [8,"Cueva de las llamas","Zona central del sótano 1."],
+ [9,"Ciudadela","Trastienda de la posada Doncellas: encógete en la casa de Romeo y sube por la enredadera."],
+ [10,"Pradera al norte de Hyrule","Rompe con una bomba la roca del camino del noroeste y baja por la escalera."],
+ [11,"Cascada Xera (base)","Usa el bastón revés en el agujero del extremo norte de la Granja Lon Lon."],
+ [12,"Monte Gongol","Dojo de Tosshin: sube las paredes del lado este y divídete en dos para los interruptores."],
+ [13,"Bosque minish","Zona noroeste; se entra desde el Lago Hylia, pasando por la Granja Lon Lon."],
+ [14,"Granja Lon Lon","Embiste el árbol con las botas de Pegaso, encógete y entra al camino minish cercano."],
+ [15,"Monte Gongol","Tallo de la cima tras la unión 37 con Melta."],
+ [16,"Región inexplorada de Tabanta","Dojo de Tesshin I, bajo la lápida."],
+ [17,"Arco de los vientos","Sala inferior derecha del primer piso."],
+ [18,"Bosque del oeste","Árbol que abre la unión 44."],
+ [19,"Ciudadela","Gana la simulación de Vesga. Copia tu archivo antes: hay un reporte de que morir ahí eliminó el trozo.",1],
+ [20,"Colina del este","Tallo de la unión 52."],
+ [21,"Jardines del castillo de Hyrule","Dojo de Kusshin, esquina inferior derecha (necesitas el candil)."],
+ [22,"Jardines del castillo de Hyrule","Escaleras de la derecha, donde estaba la fuente antes de la unión 22."],
+ [23,"Monte Gongol","Cueva de guantes de topo junto a la del Ermitaño de Gongol."],
+ [24,"Lago Hylia","Bucea en el estanque junto a la casa de Aiyer."],
+ [25,"Lago Hylia","Al oeste de la cabaña del alcalde Hagar."],
+ [26,"Lago Hylia","Dojo de Hasshin, al oeste de la cabaña del alcalde Hagar."],
+ [27,"Valle real","Tumba superior izquierda del cementerio."],
+ [28,"Pradera al sur de Hyrule","Arcada en el agua, encogido (usa el punto de encogerte del suroeste)."],
+ [29,"Cascada Xera","En el agua, cerca de la entrada."],
+ [30,"Región inexplorada de Tabanta","Arcada en el agua del sureste, encogido (usa el punto del noroeste)."],
+ [31,"Ruinas de los vientos","Cueva minish: encógete en el segundo punto, retrocede y baja por la enredadera del medio."],
+ [32,"Palacio de los vientos","Cuarto piso, pasillo bajo una rejilla."],
+ [33,"Lago Hylia","Isla a la que llegas con la capa Roc."],
+ [34,"Lago Hylia","Cueva a la que llegas con la capa Roc; entra con los guantes de topo y sube el tallo."],
+ [35,"Lago Hylia","Cueva de guantes de topo alcanzable con la capa Roc que lleva a la Granja Lon Lon, donde está el trozo."],
+ [36,"Región inexplorada de Tabanta","Esquina superior derecha, cerca de la cascada de Goro: empuja los bloques de la derecha."],
+ [37,"Cascada Xera","Cueva detrás de una cascada (unión 85 con Gale)."],
+ [38,"Cascada Xera","Cueva de guantes de topo tras la unión 99."],
+ [39,"Ciudadela","Completa todas las rondas del juego de los cucos de Anju (3 cucos en 55 segundos)."],
+ [40,"Ciudadela","Camino minish del patio del Colegio Fabuloso (tras revivir la espada cuádruple)."],
+ [41,"Ciudadela","Cueva de la muñequera: desde el final del puente, salta con la capa Roc."],
+ [42,"Ciudadela","Ponte bajo la campana, salta y planea con la capa Roc para tocarla."],
+ [43,"Bosque minish","Cueva minish de más a la izquierda: encógete, ve al noroeste y cruza el charco nadando."],
+ [44,"Ciudadela","Casa del robot junto a la Cafetería Mamá: habla con Orwen con 130 figuritas antes del final, o enséñale la medalla del Club Minitendo después."]
+];
+const HCS = [
+ [1,"Gran chuchu verde (Sepulcro del bosque)"],[2,"Gleeok (Cueva de las llamas)"],[3,"Hisse (Arco de los vientos)"],
+ [4,"Octorok gigante (Templo de las aguas)"],[5,"Gyorg (Palacio de los vientos)"],[6,"Librari, tras la unión 100"]
+];
+
+/* Figuritas: condición por código */
+const FCOND = {
+ S:"Desde el inicio", W:"Al entrar por primera vez al Bosque del oeste", C:"Tras la Cueva de las llamas",
+ F:"Tras el Arco de los vientos", T:"Tras el Templo de las aguas", R:"Tras el Mausoleo real",
+ P:"Al entrar por primera vez al Palacio de los vientos", Q:"Tras el Palacio de los vientos", E:"Tras los créditos", X:"Requisito especial"
+};
+const FORDER = ["S","W","C","F","T","R","P","Q","X","E"];
+const FIGN = ["","Link sin gorro","Link con gorro","Princesa Zelda","Ezero, el gorro","Vaati brujo","Rey Daphness","Impa, el secretario","Smith","Alcalde Hagar","Sobre","Sello","Lem","Dr. Left","Escultor Minitendo","Encargado sala","Aiyer","Vesga","Gorman","Anju","Broco Lee","Frutón","Terry","Cartero","Ermitaño de Gongol","Abuela estropajo","Dumper","Rey Gustaf","Sirope","Gran hada mariposa","Gran hada colibrí","Gran hada libélula","Poemun","Nayru","Farore","Din","Mariposa Felicidad","Ghini rosa","Festa","Gentel","Minish bosque","Librari","Minish comunidad","Melta","Minish montaña","Goron","Vaati minish","Vasallos","Biblioteca","Maestros espada","Sal y Pimienta","Colegio Fabuloso","Cafetería Mamá","Doncellas","Amigos de Jil","Los carpinteros","Joven pareja","Hyrule pacífica 1","Hyrule pacífica 2","Hyrule pacífica 3","¡Kikiriki!","La granja Lon Lon","Hijos del viento","Espíritu y Brisa","Tingle y hermanos","Ine y Moni","Goron mercader","Pillo y Bicho","Nuranul","Ciervo volador","Gusano Mold","Pinchón","Ojo diana","Matorral mercader","Armos","Keese","Keaton","Ghini","Gibdo","Kyum","Spark","Ferrus","Ferrus rojo","Chaser","Chuchu roca","Tail","Doamane","Peahat","Yelmosaurio","Wallmaster","Floormaster","Pols","Soldado bomba","Bombite","Like Like","Rupiente","Rope","Goron roca","Ferrobola","Heiji","Moblin lanza","Moblin arco","Piraña nube","Coleoptro pinchos","Coleoptro","Poire","Invocantis","Invocantis de fuego","Invocantis de hielo","Whisp","Octorok","Octorok dorado","Tektite dorado","Cuerda dorada","Negri y Golpri","Lakitu","Stalfos","Zoro Zoro","Chuchu","Tektite","Trampa","Leever","Imos","Chuchu pinchos","Ferrus negro","Gyorg","Biggoron","Gran chuchu verde","Gleeok","Hisse","Gran chuchu azul","Zelda y Link","Ezero minish","Blacknut","Vaati brujo oscuro","Vaati tenebroso","Vaati monstruo"];
+const FIGC = " SSSSWSSSSXSSTQFSTFSSSXSXFRRFCFRFWWWXXSSSTTFFXFFTQSSSWSSTSSTFFPSQWXXSTTSFSFSSRQSFFQSPFRSSTFSSQFFFSQSWWPTSSFQQPSXXXWPFSSSSFSCTQPSCFTEEEEEE"; /* índice = número de figurita */
+const FIGX = {
+ 10:"Une piedras con el cartero (unión 23).",
+ 22:"Entra al Bosque del oeste y limpia con el jarrón mágico la alfombra polvorienta de la plaza.",
+ 24:"Habla con el Ermitaño de Gongol en su cueva del noroeste del Monte Gongol.",
+ 36:"Segunda unión con Din, Nayru o Farore (uniones 77 a 79).",
+ 37:"Unión con Dumper (unión 73).",
+ 45:"Completa la cueva de los Goron y abre el cofre del fondo (cuarta botella).",
+ 66:"Unión con el goron de fuera de la cueva (unión 31).",
+ 67:"Uniones con el fantasma del cementerio hasta que su hermano se vaya de la Ciudadela (uniones 71 y 72).",
+ 111:"Cualquier unión de Octorok dorado (19, 53 o 66).",
+ 112:"Cualquier unión de Tektite dorado (20, 63 o 84).",
+ 113:"Cualquier unión de cuerda dorada (7, 15 u 80)."
+};
+
+/* ================= RENDER LISTAS ================= */
+function cnt(o){ return Object.keys(o||{}).length; }
+function listCounts(){
+  const f = cnt(S.f), h = cnt(S.h), c = cnt(S.c), g = cnt(S.g);
+  const set = (id,t)=>{ const el = document.getElementById(id); if(el) el.textContent = t; };
+  set("cFus", `${f} de 100`); set("cTc", `${h} de 44 trozos, ${c} de 6 contenedores`); set("cFig", `${g} de 136`);
+  set("segFus", `Uniones ${f}/100`); set("segTc", `Corazones ${h + c}/50`); set("segFig", `Figuritas ${g}/136`);
+}
+function matches(q, ...txt){ if(!q) return true; q = q.toLowerCase(); return txt.join(" ").toLowerCase().includes(q); }
+
+function renderFus(){
+  const q = ($("#qFus")||{}).value || "", hide = ($("#hFus")||{}).checked;
+  const open = new Set([...document.querySelectorAll("#fusBody details[open]")].map(d=>d.dataset.k));
+  const first = !$("#fusBody").children.length;
+  $("#fusBody").innerHTML = FUS.map((st,si)=>{
+    const done = st[2].filter(r=>S.f[r[0]]).length;
+    const items = st[2].filter(r=>!(hide && S.f[r[0]]) && matches(q, r[1], r[3], PIECE[r[2]][1], String(r[0]))).map(r=>{
+      const p = PIECE[r[2]];
+      return `<li class="${S.f[r[0]]?"done":""} ${r[4]?"warn":""}"><input type="checkbox" data-f="${r[0]}" ${S.f[r[0]]?"checked":""} aria-label="Unión ${r[0]} hecha"><div class="txt" data-tog="f" data-id="${r[0]}"><span class="num">${r[0]}</span> <b>${r[1]}</b> <span class="pc ${p[0]}">${p[1]}</span><div class="res">${r[3]}</div></div></li>`;
+    }).join("");
+    if(q && !items) return "";
+    const isOpen = q ? true : first ? si===0 : open.has(String(si));
+    return `<details class="chapter" data-k="${si}" ${isOpen?"open":""}><summary><span class="chnum">${si+1}</span><span class="chtitle">${st[0]}<small>Uniones ${st[2][0][0]} a ${st[2][st[2].length-1][0]}</small></span><span class="chprog">${done} de ${st[2].length}</span></summary>${st[1]?`<p class="stage-note">${st[1]}</p>`:""}<ol class="steps">${items || `<li><span></span><div class="muted">Todas hechas.</div></li>`}</ol></details>`;
+  }).join("") || `<p class="muted">Nada coincide con la búsqueda.</p>`;
+  listCounts();
+}
+
+function renderTc(){
+  const hide = ($("#hTc")||{}).checked, q = ($("#qTc")||{}).value || "";
+  $("#tcBody").innerHTML = TCS.filter(t=>!(hide && S.h[t[0]]) && matches(q, t[1], t[2], "TC "+t[0])).map(t=>
+    `<li class="${S.h[t[0]]?"done":""} ${t[3]?"warn":""}"><input type="checkbox" data-h="${t[0]}" ${S.h[t[0]]?"checked":""} aria-label="Trozo ${t[0]} conseguido"><div class="txt" data-tog="h" data-id="${t[0]}"><span class="num">TC ${t[0]}</span> <b>${t[1]}</b><div class="res">${t[2]}</div></div></li>`
+  ).join("") || `<li><span></span><div class="muted">Nada que mostrar.</div></li>`;
+  $("#hcBody").innerHTML = HCS.map(c=>
+    `<li class="${S.c[c[0]]?"done":""}"><input type="checkbox" data-c="${c[0]}" ${S.c[c[0]]?"checked":""} aria-label="Contenedor ${c[0]} conseguido"><div class="txt" data-tog="c" data-id="${c[0]}"><span class="num">C ${c[0]}</span> ${c[1]}</div></li>`
+  ).join("");
+  const hearts = 3 + cnt(S.c) + Math.floor(cnt(S.h)/4);
+  $("#heartTotal").textContent = `Corazones actuales según lo marcado: ${hearts} de 20 (${cnt(S.h)%4} de 4 trozos en el corazón en curso).`;
+  listCounts();
+}
+
+function renderFig(){
+  const hide = ($("#hFig")||{}).checked, q = ($("#qFig")||{}).value || "";
+  const open = new Set([...document.querySelectorAll("#figBody details[open]")].map(d=>d.dataset.k));
+  $("#figBody").innerHTML = FORDER.map(code=>{
+    const nums = []; for(let i=1;i<=136;i++) if(FIGC[i]===code) nums.push(i);
+    const done = nums.filter(i=>S.g[i]).length;
+    const items = nums.filter(i=>!(hide && S.g[i]) && matches(q, FIGN[i], FIGX[i]||"", String(i))).map(i=>
+      `<li class="${S.g[i]?"done":""}"><input type="checkbox" data-g="${i}" ${S.g[i]?"checked":""} aria-label="Figurita ${i} conseguida"><div class="txt" data-tog="g" data-id="${i}"><span class="num">${String(i).padStart(3,"0")}</span> <b>${FIGN[i]}</b>${FIGX[i]?`<div class="res">${FIGX[i]}</div>`:""}</div></li>`
+    ).join("");
+    if(q && !items) return "";
+    const isOpen = q ? true : open.has(code);
+    return `<details class="chapter" data-k="${code}" ${isOpen?"open":""}><summary><span class="chnum">${nums.length}</span><span class="chtitle">${FCOND[code]}<small>${done===nums.length?"Completas":"Faltan "+(nums.length-done)}</small></span><span class="chprog">${done} de ${nums.length}</span></summary><ol class="steps">${items || `<li><span></span><div class="muted">Todas conseguidas.</div></li>`}</ol></details>`;
+  }).join("") || `<p class="muted">Nada coincide con la búsqueda.</p>`;
+  listCounts();
+}
+
+function showSeg(id){
+  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.l===id));
+  document.querySelectorAll(".segpane").forEach(p=>p.hidden = p.id !== id);
+  try{ localStorage.setItem(KEY+"-seg", id); }catch(e){}
+}
+function renderLists(){ renderFus(); renderTc(); renderFig(); }
+
 /* ================= STATE ================= */
 const KEY = "tmc-ra559-app-v1";
-let S = {a:{}, s:{}, t:0};
+let S = {a:{}, s:{}, f:{}, h:{}, c:{}, g:{}, t:0};
 let storageOK = true;
-function loadLocal(){ try{ const r = localStorage.getItem(KEY); if(r){ const j = JSON.parse(r); if(j && j.a && j.s) S = {a:j.a, s:j.s, t:j.t||0}; } }catch(e){ storageOK = false; } }
+function loadLocal(){ try{ const r = localStorage.getItem(KEY); if(r){ const j = JSON.parse(r); if(j && j.a && j.s) S = {a:j.a, s:j.s, f:j.f||{}, h:j.h||{}, c:j.c||{}, g:j.g||{}, t:j.t||0}; } }catch(e){ storageOK = false; } }
 function saveLocal(){
   try{ localStorage.setItem(KEY, JSON.stringify(S)); storageOK = true; }
   catch(e){ storageOK = false; }
@@ -619,7 +894,7 @@ function setSync(){
   if(d){ d.className = "syncdot " + (storageOK ? "ok" : "local"); d.title = txt; }
 }
 function persist(){ S.t = Date.now(); saveLocal(); }
-function setState(j){ S = {a: j.a || {}, s: j.s || {}, t: 0}; persist(); renderAll(); }
+function setState(j){ S = {a: j.a || {}, s: j.s || {}, f: j.f || {}, h: j.h || {}, c: j.c || {}, g: j.g || {}, t: 0}; persist(); renderAll(); }
 function validBackup(j){ return j && typeof j.a === "object" && typeof j.s === "object"; }
 
 /* ================= RENDER ================= */
@@ -640,7 +915,7 @@ function renderRoute(){
   $("#route").innerHTML = ROUTE.map((ch,i)=>{
     let done = 0;
     const lis = ch[2].map((st,j)=>{
-      const id = `${i}-${j}`; const d = !!S.s[id]; if(d) done++;
+      const id = `r${i}-${j}`; const d = !!S.s[id]; if(d) done++;
       if(hide && d) return "";
       return `<li class="${d?"done":""} ${st[2]?"warn":""}"><input type="checkbox" data-step="${id}" ${d?"checked":""} aria-label="Paso ${j+1} completado"><div><div class="txt">${st[0]}</div>${st[1].length?`<div class="chips">${st[1].map(chip).join("")}</div>`:""}</div></li>`;
     }).join("");
@@ -671,7 +946,7 @@ function renderBosses(){
 }
 
 function renderGloss(){
-  $("#glossTable").innerHTML = `<tr><td><b>En tu partida (español)</b></td><td><b>En inglés (RA, Thonky)</b></td></tr>` + GLOSS.map(g=>`<tr><td>${g[0]}</td><td>${g[1]}</td></tr>`).join("");
+  $("#glossTable").innerHTML = `<tr><td><b>En tu partida (español)</b></td><td><b>En inglés (RA y guías)</b></td></tr>` + GLOSS.map(g=>`<tr><td>${g[0]}</td><td>${g[1]}</td></tr>`).join("");
 }
 
 function renderCollect(){
@@ -679,23 +954,20 @@ function renderCollect(){
   <h3>Piedras de la suerte (Miracle Maker y Tingle Trophy)</h3>
   <div class="chips">${chip("fuse50")}${chip("tingle")}</div>
   <ul class="clean">
-   <li>Son 100 uniones: 18 aleatorias y 9 con piedras doradas obligatorias. Muchas se abren por etapas de la historia; antes de la escena de la Región inexplorada de Tabanta solo hay unas 21 disponibles.</li>
-   <li>Usa el <a href="https://www.thonky.com/zelda-minish-cap/kinstone-fusion" target="_blank" rel="noopener">checklist de Thonky</a> desde el principio (en inglés: «Kinstone Fusion»). Un jugador notó que algunas uniones aparecen antes de lo indicado; hacerlas en el orden de la lista no le dio problemas.</li>
-   <li>Las uniones compartidas son una roja (fuente del castillo), una azul (árbol espinoso de la Pradera al norte de Hyrule) y el resto verdes. Busca las que falten después de salir del Castillo de Hyrule tenebroso, el último desbloqueo.</li>
+   <li>La lista completa de las 100 está en «Uniones». Consejos de la comunidad:</li>
+   <li>Las compartidas son una roja (fuente del castillo), una azul (árbol de la Pradera al norte) y el resto verdes. Busca las que falten después de salir del Castillo de Hyrule tenebroso, el último desbloqueo.</li>
    <li>El Ermitaño de Gongol siempre ofrece uniones compartidas (máximo 3): si no te ofrece ninguna y no hiciste 3 con él, ya las tienes todas.</li>
-   <li>Chinmin, la maestra de pelo morado del Colegio Fabuloso, ofrece uniones con un 10% de probabilidad; entra y sal varias veces. Su unión única es el cofre entre las rocas de la salida oeste de la Ciudadela: déjala para el final.</li>
-   <li>Personajes con varias uniones y la última que ofrecen: Tingle (roja, Tektite dorado cerca de la Cueva de las llamas), David Jr. (verde, cofre del camino a la Mina de Melta), Smith (verde, cofre norte de la Meseta Beele), Jil (verde, nenúfar junto a la tumba de la Región inexplorada de Tabanta), Din, Farore y Nayru (roja, cada mariposa), Dumper (verde, grieta al sur del tallo de las Ruinas de los vientos), Bicho (azul, fantasma entre las hojas de la Ciudadela), Ghini rosa (verde, árbol caído del cofre del Bosque del oeste), el matorral mercader que vende piedras en el Bosque minish (verde, grieta junto al cofre del arco), Brisa (verde, árbol caído fuera de la Región inexplorada de Tabanta) y Maki (verde, cofre noreste del cementerio).</li>
-   <li>Piedras verdes: la forma más fiable es cortar hierba en las Ruinas de los vientos yendo y viniendo entre pantallas. El néctar blanco ayuda y el amarillo recupera el gasto.</li>
-   <li>Un jugador encontró su última unión con un minish del bosque en el Monte Gongol, en el agujero junto a la semilla que se planta.</li>
+   <li>Si te falta una aleatoria, prueba también con los minish del bosque, de la biblioteca, de la montaña y de la Ciudadela. Un jugador encontró la suya con el minish del agujero junto a la semilla del Monte Gongol.</li>
+   <li>Piedras verdes: corta hierba en las Ruinas de los vientos yendo y viniendo entre pantallas. El néctar blanco ayuda y el amarillo recupera el gasto. Las rojas y azules salen de cofres o cavando con los guantes de topo.</li>
+   <li>Tras la unión 100, habla con Tingle (a veces dos veces) para recibir el trofeo.</li>
   </ul>
 
   <h3>Figuritas (Carlov Medal)</h3>
   <div class="chips">${chip("carlov")}</div>
   <ul class="clean">
-   <li>130 antes de los créditos y 6 más después. Muchas se desbloquean al completar mazmorras o uniones concretas (Octorok dorado, Tektite dorado, Cuerda dorada, Goron mercader, la empleada de correos, Pillo y Bicho, entre otras).</li>
+   <li>La lista completa de las 136 está en «Figuritas».</li>
    <li>Gasta caracolas a menudo: si llegas al máximo, las que encuentres se pierden. En la tienda de Aiyer se venden caracolas en lote. Mantén R para sumar de 10 en 10.</li>
-   <li>Nunca apuestes con probabilidad 0%.</li>
-   <li>Con 130 figuritas, Orwen (fuera de la Cafetería Mamá) abre la casa del robot: trozo de corazón, 600 rupias y fonógrafo.</li>
+   <li>Con 130 figuritas, Orwen (fuera de la Cafetería Mamá) abre la casa del robot: trozo de corazón, 600 rupias y fonógrafo. Con la medalla, Aiyer deja de vender caracolas y los cofres de caracolas dan rupias.</li>
   </ul>
 
   <h3>Botellas (How Jarring!)</h3>
@@ -754,7 +1026,11 @@ function updateScore(){
   $("#halfR").style.transform = `translateX(${gap}px)`;
 }
 
-function renderAll(){ renderGloss(); renderRoute(); renderTable(); renderMiss(); renderBosses(); renderCollect(); updateScore(); }
+function renderPost(){
+  const el = $("#postBody"); if(!el) return;
+  el.innerHTML = POST.map((r,i)=>`<li class="${S.s["pg-"+i]?"done":""}"><input type="checkbox" data-step="pg-${i}" ${S.s["pg-"+i]?"checked":""} aria-label="Pendiente ${i+1}"><div class="txt">${r[0]}<div class="chips">${r[1].map(chip).join("")}</div></div></li>`).join("");
+}
+function renderAll(){ renderGloss(); renderPost(); renderLists(); renderRoute(); renderTable(); renderMiss(); renderBosses(); renderCollect(); updateScore(); }
 
 /* ================= EVENTS ================= */
 document.addEventListener("click", e=>{
@@ -762,6 +1038,14 @@ document.addEventListener("click", e=>{
   if(c){ const k = c.dataset.ach; S.a[k] = !S.a[k]; if(!S.a[k]) delete S.a[k]; persist(); renderAll(); return; }
   const t = e.target.closest("nav.tabs button");
   if(t){ showTab(t.dataset.t, true); return; }
+  const sg = e.target.closest(".seg button");
+  if(sg){ showSeg(sg.dataset.l); return; }
+  const lt = e.target.closest(".txt[data-tog]");
+  if(lt && !e.target.closest("a,button")){
+    const box = lt.closest("li").querySelector("input[type=checkbox]");
+    if(box){ box.checked = !box.checked; box.dispatchEvent(new Event("change", {bubbles:true})); }
+    return;
+  }
   const tx = e.target.closest("ol.steps .txt");
   if(tx && !e.target.closest("a,button")){
     const box = tx.closest("li").querySelector("input[data-step]");
@@ -769,8 +1053,18 @@ document.addEventListener("click", e=>{
   }
 });
 document.addEventListener("change", e=>{
+  const ds = e.target.dataset;
+  for(const [attr, bucket, fn] of [["f","f",renderFus],["h","h",renderTc],["c","c",renderTc],["g","g",renderFig]]){
+    if(ds[attr] !== undefined && e.target.type === "checkbox" && e.target.closest(".segpane")){
+      if(e.target.checked) S[bucket][ds[attr]] = 1; else delete S[bucket][ds[attr]];
+      persist(); fn(); return;
+    }
+  }
+  if(["hFus"].includes(e.target.id)) { renderFus(); return; }
+  if(["hTc"].includes(e.target.id)) { renderTc(); return; }
+  if(["hFig"].includes(e.target.id)) { renderFig(); return; }
   const s = e.target.dataset.step;
-  if(s){ if(e.target.checked) S.s[s] = 1; else delete S.s[s]; persist(); renderRoute(); return; }
+  if(s){ if(e.target.checked) S.s[s] = 1; else delete S.s[s]; persist(); if(s.startsWith("pg-")) renderPost(); else renderRoute(); return; }
   const k = e.target.dataset.achBox;
   if(k){ if(e.target.checked) S.a[k] = 1; else delete S.a[k]; persist(); renderAll(); return; }
   if(["hideDone"].includes(e.target.id)) renderRoute();
@@ -789,12 +1083,12 @@ function showTab(id, scroll){
 $("#resumeBtn").onclick = ()=>{
   showTab("ruta", false);
   for(let i=0;i<ROUTE.length;i++){
-    const j = ROUTE[i][2].findIndex((_,k)=>!S.s[`${i}-${k}`]);
+    const j = ROUTE[i][2].findIndex((_,k)=>!S.s[`r${i}-${k}`]);
     if(j>=0){
       if($("#hideDone").checked){ $("#hideDone").checked = false; renderRoute(); }
       const det = document.querySelector(`#route details[data-i="${i}"]`);
       det.open = true;
-      const li = det.querySelector(`input[data-step="${i}-${j}"]`).closest("li");
+      const li = det.querySelector(`input[data-step="r${i}-${j}"]`).closest("li");
       const off = document.querySelector(".topbar").offsetHeight || 0;
       window.scrollTo({top: li.getBoundingClientRect().top + window.scrollY - off - 16, behavior:"smooth"});
       li.animate([{background:"var(--soft)"},{background:"transparent"}],{duration:1600});
@@ -803,10 +1097,15 @@ $("#resumeBtn").onclick = ()=>{
   }
   window.scrollTo({top:0, behavior:"smooth"});
 };
+document.addEventListener("input", e=>{
+  if(e.target.id==="qFus") renderFus();
+  if(e.target.id==="qTc") renderTc();
+  if(e.target.id==="qFig") renderFig();
+});
 $("#openAll").onclick = ()=>document.querySelectorAll("#route details").forEach(d=>d.open=true);
 $("#closeAll").onclick = ()=>document.querySelectorAll("#route details").forEach(d=>d.open=false);
 $("#dlBtn").onclick = ()=>{
-  const blob = new Blob([JSON.stringify({app:"minish-cap-ra559", a:S.a, s:S.s, t:S.t}, null, 1)], {type:"application/json"});
+  const blob = new Blob([JSON.stringify({app:"minish-cap-ra559", a:S.a, s:S.s, f:S.f, h:S.h, c:S.c, g:S.g, t:S.t}, null, 1)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   const d = new Date();
@@ -827,7 +1126,7 @@ $("#upFile").onchange = async e=>{
   e.target.value = "";
 };
 $("#expBtn").onclick = async ()=>{
-  const txt = JSON.stringify({a:S.a, s:S.s}); $("#ioBox").value = txt;
+  const txt = JSON.stringify({a:S.a, s:S.s, f:S.f, h:S.h, c:S.c, g:S.g}); $("#ioBox").value = txt;
   try{ await navigator.clipboard.writeText(txt); syncMsg().textContent = "Respaldo copiado."; }
   catch(e){ $("#ioBox").select(); syncMsg().textContent = "Copia el texto del recuadro."; }
 };
@@ -839,7 +1138,7 @@ $("#impBtn").onclick = ()=>{
   }catch(e){ syncMsg().textContent = "El texto no es un respaldo válido de esta guía."; }
 };
 $("#resetBtn").onclick = ()=>{
-  if(confirm("¿Borrar todo el progreso marcado?")){ S = {a:{}, s:{}, t:0}; persist(); renderAll(); }
+  if(confirm("¿Borrar todo el progreso marcado?")){ S = {a:{}, s:{}, f:{}, h:{}, c:{}, g:{}, t:0}; persist(); renderAll(); }
 };
 $("#themeBtn").onclick = ()=>{
   const r = document.documentElement;
@@ -849,6 +1148,7 @@ $("#themeBtn").onclick = ()=>{
 
 loadLocal();
 renderAll();
+try{ const sgs = localStorage.getItem(KEY+"-seg"); if(sgs && document.getElementById(sgs)) showSeg(sgs); }catch(e){}
 try{ const lt = localStorage.getItem(KEY+"-tab"); if(lt && document.getElementById(lt)) showTab(lt, false); }catch(e){}
 setSync();
 if(navigator.storage && navigator.storage.persist){ navigator.storage.persist().catch(()=>{}); }

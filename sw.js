@@ -1,5 +1,5 @@
 /* Guardado offline de la app. Sube el número de versión si cambias algún archivo. */
-const CACHE = "minish-ra559-v1";
+const CACHE = "minish-ra559-v3";
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/maskable-512.png", "./icons/apple-touch-icon.png",

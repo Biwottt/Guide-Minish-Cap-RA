@@ -42,4 +42,4 @@ Descarga un respaldo de vez en cuando: si desinstalas la app o borras los datos 
 
 ## Si actualizas algún archivo
 
-Cambia `minish-ra559-v1` por `minish-ra559-v2` en `sw.js` y vuelve a subir los archivos. La app instalada se actualizará la próxima vez que la abras con internet. Tu progreso no se borra.
+Cambia el número de versión de `minish-ra559-v2` (por ejemplo, a `minish-ra559-v3`) en `sw.js` y vuelve a subir los archivos. La app instalada se actualizará la próxima vez que la abras con internet. Tu progreso no se borra.
